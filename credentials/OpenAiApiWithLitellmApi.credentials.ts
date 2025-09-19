@@ -9,7 +9,7 @@ export class OpenAiApiWithLitellmApi implements ICredentialType {
     name = 'openAiApiWithLitellmApi';
     icon = 'file:OpenAiApiWithLitellmApi.credentials.svg' as const;
 
-    displayName = 'OpenAI API with LiteLLM';
+    displayName = 'OpenAI API with LiteLLM API';
     documentationUrl = 'https://docs.litellm.ai/';
 
     properties: INodeProperties[] = [
