@@ -1,0 +1,66 @@
+{
+  "name": "@rlquilez/n8n-nodes-openai-litellm",
+  "version": "1.0.2",
+  "description": "n8n community node: OpenAI-compatible LLM provider with structured JSON metadata injection",
+  "keywords": [
+    "n8n-community-node-package",
+    "langchain",
+    "openai",
+    "litellm"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "author": {
+    "name": "Ruby Lo",
+    "email": "rorubyy@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rlquilez/n8n-nodes-openai-litellm.git"
+  },
+  "engines": {
+    "node": ">=18.0"
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "npx rimraf dist && tsc && gulp build:icons",
+    "dev": "tsc --watch",
+    "format": "prettier nodes credentials --write",
+    "lint": "eslint nodes credentials package.json",
+    "lintfix": "eslint nodes credentials package.json --fix",
+    "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes credentials package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/OpenAiApiWithLitellmApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/LmChatOpenAiLitellm/LmChatOpenAiLitellm.node.js"
+    ]
+  },
+  "dependencies": {
+    "@langchain/core": "^0.3.72",
+    "@langchain/openai": "^0.6.9",
+    "openai": "^5.19.1",
+    "proxy-from-env": "^1.1.0",
+    "undici": "^7.15.0"
+  },
+  "devDependencies": {
+    "@types/json-schema": "^7.0.15",
+    "@types/proxy-from-env": "^1.0.4",
+    "@typescript-eslint/parser": "~8.32.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-n8n-nodes-base": "^1.16.3",
+    "gulp": "^5.0.1",
+    "gulp-cli": "^3.1.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  }
+}
