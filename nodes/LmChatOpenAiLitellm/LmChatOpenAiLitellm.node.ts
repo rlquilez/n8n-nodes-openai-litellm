@@ -1,18 +1,18 @@
 import { ChatOpenAI, type ClientOptions } from '@langchain/openai';
 import {
     jsonParse,
+    NodeConnectionType,
     type INodeType,
     type INodeTypeDescription,
     type ISupplyDataFunctions,
     type SupplyData,
 } from 'n8n-workflow';
 
-import { CallbackHandler } from 'langfuse-langchain';
 import { searchModels } from './methods/loadModels';
 import { N8nLlmTracing } from './utils/N8nLlmTracing'
 
 
-export class LmChatOpenAiLangfuse implements INodeType {
+export class LmChatOpenAiLitellm implements INodeType {
     methods = {
         listSearch: {
             searchModels,
@@ -20,15 +20,15 @@ export class LmChatOpenAiLangfuse implements INodeType {
     };
 
     description: INodeTypeDescription = {
-        displayName: 'OpenAI Chat Model with Langfuse',
+        displayName: 'OpenAI Chat Model with LiteLLM',
 
-        name: 'lmChatOpenAiLangfuse',
-        icon: { light: 'file:LmChatOpenAiWithLangfuseLight.icon.svg', dark: 'file:LmChatOpenAiWithLangfuseDark.icon.svg' },
+        name: 'lmChatOpenAiLitellm',
+        icon: { light: 'file:LmChatOpenAiWithLitellmLight.icon.svg', dark: 'file:LmChatOpenAiWithLitellmDark.icon.svg' },
         group: ['transform'],
         version: [1, 1.1, 1.2],
-        description: 'For advanced usage with an AI chain',
+        description: 'For advanced usage with an AI chain and structured JSON metadata',
         defaults: {
-            name: 'OpenAI Chat Model with Langfuse',
+            name: 'OpenAI Chat Model with LiteLLM',
         },
         codex: {
             categories: ['AI'],
@@ -46,10 +46,10 @@ export class LmChatOpenAiLangfuse implements INodeType {
         },
 
         inputs: [],
-        outputs: ['ai_languageModel'],
+        outputs: [NodeConnectionType.AiLanguageModel],
         outputNames: ['Model'],
         credentials: [
-            { name: 'openAiApiWithLangfuseApi', required: true },
+            { name: 'openAiApiWithLitellmApi', required: true },
         ],
         requestDefaults: {
             ignoreHttpStatusErrors: true,
@@ -59,16 +59,16 @@ export class LmChatOpenAiLangfuse implements INodeType {
         properties: [
             {
                 displayName: 'Credential',
-                name: 'openAiApiWithLangfuseApi',
+                name: 'openAiApiWithLitellmApi',
                 type: 'credentials',
                 default: '',
                 required: true,
             },
-            // Langfuse metadata
+            // JSON Metadata
 
             {
-                displayName: 'Langfuse Metadata',
-                name: 'langfuseMetadata',
+                displayName: 'JSON Metadata',
+                name: 'jsonMetadata',
                 type: 'collection',
                 default: {},
                 options: [
@@ -81,7 +81,7 @@ export class LmChatOpenAiLangfuse implements INodeType {
     "env": "dev",
     "workflow": "main-flow"
 }`,
-                        description: "Optional. Pass extra metadata to be attached to Langfuse traces."
+                        description: "Optional. Pass extra structured JSON metadata to be attached to the model."
                         ,
                     },
                     {
@@ -89,14 +89,14 @@ export class LmChatOpenAiLangfuse implements INodeType {
                         name: 'sessionId',
                         type: 'string',
                         default: 'default-session-id',
-                        description: 'Used in Langfuse trace grouping (langfuse_session_id)',
+                        description: 'Session identifier for grouping related requests',
                     },
                     {
                         displayName: 'User ID',
                         name: 'userId',
                         type: 'string',
                         default: '',
-                        description: 'Optional: for trace attribution (langfuse_user_id)',
+                        description: 'Optional: User identifier for request attribution',
                     }
                 ],
             },
@@ -360,20 +360,19 @@ export class LmChatOpenAiLangfuse implements INodeType {
     };
 
     async supplyData(this: ISupplyDataFunctions, itemIndex: number): Promise<SupplyData> {
-        const credentials = await this.getCredentials('openAiApiWithLangfuseApi');
+        const credentials = await this.getCredentials('openAiApiWithLitellmApi');
 
         const {
             sessionId,
             userId,
             customMetadata: customMetadataRaw = {},
-        } = this.getNodeParameter('langfuseMetadata', itemIndex) as {
+        } = this.getNodeParameter('jsonMetadata', itemIndex) as {
             sessionId: string;
             userId?: string;
             customMetadata?: string | Record<string, any>;
         };
 
         let customMetadata: Record<string, any> = {};
-
 
         if (typeof customMetadataRaw === 'string') {
             try {
@@ -387,16 +386,15 @@ export class LmChatOpenAiLangfuse implements INodeType {
             customMetadata = customMetadataRaw as Record<string, any>;
         }
 
-        // langfuse handler
-        const lfHandler = new CallbackHandler({
-            baseUrl: credentials.langfuseBaseUrl as string,
-            publicKey: credentials.langfusePublicKey as string,
-            secretKey: credentials.langfuseSecretKey as string,
-            sessionId,
-            userId,
-        });
+        // Add session and user info to metadata
+        if (sessionId) {
+            customMetadata.sessionId = sessionId;
+        }
+        if (userId) {
+            customMetadata.userId = userId;
+        }
 
-        console.log('[Langfuse] CallbackHandler created with session:', sessionId, 'user:', userId, 'metadata:', customMetadata);
+        console.log('[JSON Metadata] Metadata prepared:', customMetadata);
 
         const version = this.getNode().typeVersion;
         const modelName =
@@ -435,7 +433,7 @@ export class LmChatOpenAiLangfuse implements INodeType {
             modelKwargs.reasoning_effort = options.reasoningEffort;
 
         const model = new ChatOpenAI({
-            callbacks: [lfHandler, new N8nLlmTracing(this)],
+            callbacks: [new N8nLlmTracing(this)],
             metadata: customMetadata,
             apiKey: credentials.apiKey as string,
             configuration: { baseURL: configuration.baseURL },

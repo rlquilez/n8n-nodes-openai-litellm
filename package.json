@@ -1,12 +1,12 @@
 {
   "name": "n8n-nodes-openai-langfuse",
-  "version": "0.1.9",
-  "description": "n8n community node: Langfuse + OpenAI-compatible LLM provider",
+  "version": "1.0.0",
+  "description": "n8n community node: OpenAI-compatible LLM provider with structured JSON metadata injection",
   "keywords": [
     "n8n-community-node-package",
-    "langfuse",
     "langchain",
-    "openai"
+    "openai",
+    "litellm"
   ],
   "license": "MIT",
   "homepage": "",
@@ -16,10 +16,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/rorubyy/n8n-nodes-openai-langfuse.git"
+    "url": "https://github.com/rlquilez/n8n-nodes-openai-litellm.git"
   },
   "engines": {
-    "node": ">=20.15"
+    "node": ">=18.0"
   },
   "main": "index.js",
   "scripts": {
@@ -36,16 +36,15 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/OpenAiApiWithLangfuseApi.credentials.js"
+      "dist/credentials/OpenAiApiWithLitellmApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/LmChatOpenAiLangfuse/LmChatOpenAiLangfuse.node.js"
+      "dist/nodes/LmChatOpenAiLitellm/LmChatOpenAiLitellm.node.js"
     ]
   },
   "dependencies": {
     "@langchain/core": "^0.3.72",
     "@langchain/openai": "^0.6.9",
-    "langfuse-langchain": "^3.0.0",
     "openai": "^5.19.1",
     "proxy-from-env": "^1.1.0",
     "undici": "^7.15.0"

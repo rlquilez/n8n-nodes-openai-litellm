@@ -1,17 +1,15 @@
 # n8n-nodes-openai-langfuse
 
-> This project is proudly developed and maintained by **Wistron DXLab**. <br><br>
-> ⚡Update: This is the new [**n8n-nodes-ai-agent-langfuse**](https://github.com/rorubyy/n8n-nodes-ai-agent-langfuse)
- project, an upgraded version with Agent integration and enhanced structured tracing support.
-![new-node-example](https://github.com/rorubyy/n8n-nodes-openai-langfuse/blob/main/assets/new-node-example.png?raw=true)
+A simplified n8n community node for OpenAI-compatible LLM providers with structured JSON metadata injection capabilities.
 
 npm package: [https://www.npmjs.com/package/n8n-nodes-openai-langfuse](https://www.npmjs.com/package/n8n-nodes-openai-langfuse)
 
 ## Features
 
 - Support for OpenAI-compatible chat models (e.g., `gpt-4.1-mini`, `gpt-4o`)
-- Automatic Langfuse tracing for every request and response
-- Custom metadata injection: `sessionId`, `userId`, and structured JSON
+- Compatible with LiteLLM and other OpenAI-compatible providers
+- Structured JSON metadata injection: `sessionId`, `userId`, and custom JSON data
+- Simplified architecture without external tracing dependencies
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
@@ -39,16 +37,16 @@ A preconfigured Docker setup is available in the `docker/` directory:
 
 1. Clone the repository and navigate to the docker/ directory
     ```bash
-    git clone https://github.com/rorubyy/n8n-nodes-openai-langfuse.git
-    cd n8n-nodes-openai-langfuse/docker
+    git clone https://github.com/rlquilez/n8n-nodes-openai-litellm.git
+    cd n8n-nodes-openai-litellm/docker
     ```
 2. Build the Docker image
     ```bash
-    docker build -t n8n-openai-langfuse .
+    docker build -t n8n-openai-litellm .
     ```
 3. Run the container
     ```bash
-    docker run -it -p 5678:5678 n8n-openai-langfuse
+    docker run -it -p 5678:5678 n8n-openai-litellm
     ```
 You can now access n8n at http://localhost:5678
 
@@ -64,47 +62,38 @@ n8n start
 ```
 ## Credential 
 
-This credential is used to:
-- Authenticate your OpenAI-compatible LLM endpoint
-- Enable Langfuse tracing, by sending structured request/response logs to your Langfuse instance
+This credential is used to authenticate your OpenAI-compatible LLM endpoint.
+
 ### OpenAI Settings
 |Field Name|Description|Example|
 |-----|-----|-----|
 |OpenAI API Key|Your API key for accessing the OpenAI-compatible endpoint|`sk-abc123...`|
-OpenAI Organization ID|(Optional) Your OpenAI organization ID, if required|`org-xyz789`|
+|OpenAI Organization ID|(Optional) Your OpenAI organization ID, if required|`org-xyz789`|
 |OpenAI Base URL|Full URL to your OpenAI-compatible endpoint|default: `https://api.openai.com/v1`|
-### Langfuse Settings
-|Field Name|Description|Example|
-|-----|-----|-----|
-Langfuse Base URL|The base URL of your Langfuse instance|`https://cloud.langfuse.com` or self-hosted URL|
-|Langfuse Public Key *|Langfuse public key used for tracing authentication|`pk-xxx`|
-Langfuse Secret Key *|Langfuse secret key used for tracing authentication|`sk-xxx`|
 
-> 🔑 How to find your Langfuse keys: <br>
-> Log in to your Langfuse dashboard, then go to: <br>
-> Settings → Projects → [Your Project] to retrieve publicKey and secretKey.
+> 💡 **LiteLLM Compatibility**: You can use this node with LiteLLM by setting the Base URL to your LiteLLM proxy endpoint (e.g., `http://localhost:4000/v1`).
 
 ### Credential UI Preview
 Once filled out, your credential should look like this:
 
-![credentials-example](https://github.com/rorubyy/n8n-nodes-openai-langfuse/blob/main/assets/credential-example.png?raw=true)
-✅ After saving the credential, you're ready to use the node and see traces in your Langfuse dashboard.
+![credentials-example](https://github.com/rlquilez/n8n-nodes-openai-litellm/blob/main/assets/credential-example.png?raw=true)
+✅ After saving the credential, you're ready to use the node with structured JSON metadata injection.
 
 ## Operations
 
-This node lets you inject Langfuse-compatible metadata into your OpenAI requests.  
-You can trace every run with context such as `sessionId`, `userId`, and any custom metadata.
+This node lets you inject structured JSON metadata into your OpenAI requests.  
+You can add context such as `sessionId`, `userId`, and any custom metadata to your model calls.
 
 ---
 ### Supported Fields
 
 | Field | Type | Description |
 |----------|----------|----------|
-| `sessionId` | `string` | Logical session ID to group related runs |
-| `userId` | `string` | ID representing the end user making the request |
+| `sessionId` | `string` | Session identifier for grouping related requests |
+| `userId` | `string` | User identifier for request attribution |
 | `metadata` | `object` | Custom JSON object with additional context (e.g., workflowId, env) |
 
-![langfuse-metadata-example](https://github.com/rorubyy/n8n-nodes-openai-langfuse/blob/main/assets/langfuse-metadata-example.png?raw=true)
+![metadata-example](https://github.com/rlquilez/n8n-nodes-openai-litellm/blob/main/assets/metadata-example.png?raw=true)
 ---
 ### 🧪 Example Setup
 | Input Field | Example Value |
@@ -121,18 +110,18 @@ Custom Metadata (JSON)
 ```
 ---
 ### Visual Example
-1. **Node Configuration UI**: This shows a sample n8n workflow using the Langfuse Chat Node.
+1. **Node Configuration UI**: This shows a sample n8n workflow using the OpenAI LiteLLM Chat Node.
 
-![node-example](https://github.com/rorubyy/n8n-nodes-openai-langfuse/blob/main/assets/node-example.png?raw=true)
+![node-example](https://github.com/rlquilez/n8n-nodes-openai-litellm/blob/main/assets/node-example.png?raw=true)
 
 2. **Workflow Setup**: A typical workflow using this node.
 
-![workflow-example](https://github.com/rorubyy/n8n-nodes-openai-langfuse/blob/main/assets/workflow-example.png?raw=true)
+![workflow-example](https://github.com/rlquilez/n8n-nodes-openai-litellm/blob/main/assets/workflow-example.png?raw=true)
 
-3. **Langfuse Trace Output**
+3. **JSON Metadata Output**
 Here’s how traces appear inside the Langfuse dashboard.
 
-![langfuse-example](https://github.com/rorubyy/n8n-nodes-openai-langfuse/blob/main/assets/langfuse-example.png?raw=true)
+![metadata-output-example](https://github.com/rlquilez/n8n-nodes-openai-litellm/blob/main/assets/langfuse-example.png?raw=true)
 
 
 ## Compatibility
@@ -140,15 +129,15 @@ Here’s how traces appear inside the Langfuse dashboard.
 - Compatible with:
   - OpenAI official API (https://api.openai.com)
   - Any OpenAI-compatible LLM (e.g. via LiteLLM, LocalAI, Azure OpenAI)
-  - Langfuse Cloud and self-hosted instances
+  - All providers that support OpenAI-compatible endpoints
 
 ## Resources
 
 - [n8n Community Node Docs](https://docs.n8n.io/integrations/community-nodes/)
-- [Langfuse Documentation](https://docs.langfuse.com/)
+- [LiteLLM Documentation](https://docs.litellm.ai/)
 - [n8n Community Forum](https://community.n8n.io/)
-- [Langfuse GitHub](https://github.com/langfuse/langfuse)
+- [OpenAI API Documentation](https://platform.openai.com/docs/)
 
 ## Version History
 
-- **v1.0** – Initial release with OpenAI + Langfuse integration
+- **v1.0** – Simplified release with OpenAI-compatible providers and structured JSON metadata injection
