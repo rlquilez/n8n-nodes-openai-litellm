@@ -422,23 +422,13 @@ export class LmChatOpenAiLitellm implements INodeType {
             configuration.baseURL = credentials.url as string;
         }
 
-        // Add custom metadata as HTTP headers for tracking
-        const defaultHeaders: Record<string, string> = {};
+        // Prepare extra_body for LiteLLM metadata support
+        const extraBody: Record<string, any> = {};
         if (Object.keys(customMetadata).length > 0) {
-            // Convert metadata to headers for OpenAI API compatibility
-            defaultHeaders['X-Custom-Metadata'] = JSON.stringify(customMetadata);
-            
-            // Add individual metadata fields as headers for easier tracking
-            Object.entries(customMetadata).forEach(([key, value]) => {
-                if (typeof value === 'string' || typeof value === 'number') {
-                    defaultHeaders[`X-Metadata-${key}`] = String(value);
-                }
-            });
+            extraBody.metadata = customMetadata;
         }
-
-        configuration.defaultHeaders = defaultHeaders;
         
-        console.log('[JSON Metadata] Headers to be sent:', defaultHeaders);
+        console.log('[JSON Metadata] Extra body to be sent:', extraBody);
 
         // Extra options to send to OpenAI, that are not directly supported by LangChain
         const modelKwargs: {
@@ -460,6 +450,7 @@ export class LmChatOpenAiLitellm implements INodeType {
             timeout: options.timeout ?? 60000,
             maxRetries: options.maxRetries ?? 2,
             modelKwargs,
+            ...(Object.keys(extraBody).length > 0 && { extraBody }),
         });
 
         return {
