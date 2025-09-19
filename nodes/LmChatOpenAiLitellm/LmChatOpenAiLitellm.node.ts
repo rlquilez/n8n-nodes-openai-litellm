@@ -77,14 +77,25 @@ export class LmChatOpenAiLitellm implements INodeType {
                         name: 'customMetadata',
                         type: 'json',
                         default: `{
-    "langfuse_user_id": "user-id",
-    "langfuse_session_id": "your-session-id",
-    "langfuse_tags": ["tag-1", "tag-2"],
+    "project": "example-project",
     "env": "dev",
-    "workflow": "main-flow",
-    "key": "value"
+    "workflow": "main-flow"
 }`,
                         description: "Optional. Pass extra structured JSON metadata to be attached to the model.",
+                    },
+                    {
+                        displayName: 'Session ID',
+                        name: 'sessionId',
+                        type: 'string',
+                        default: 'default-session-id',
+                        description: 'Used for trace grouping and session management',
+                    },
+                    {
+                        displayName: 'User ID',
+                        name: 'userId',
+                        type: 'string',
+                        default: '',
+                        description: 'Optional: for trace attribution and user identification',
                     }
                 ],
             },
@@ -351,8 +362,12 @@ export class LmChatOpenAiLitellm implements INodeType {
         const credentials = await this.getCredentials('openAiApiWithLitellmApi');
 
         const {
+            sessionId,
+            userId,
             customMetadata: customMetadataRaw = {},
         } = this.getNodeParameter('jsonMetadata', itemIndex) as {
+            sessionId?: string;
+            userId?: string;
             customMetadata?: string | Record<string, any>;
         };
 
@@ -370,7 +385,15 @@ export class LmChatOpenAiLitellm implements INodeType {
             customMetadata = customMetadataRaw as Record<string, any>;
         }
 
-        console.log('[JSON Metadata] Metadata prepared:', customMetadata);
+        // Add sessionId and userId to metadata if provided
+        if (sessionId) {
+            customMetadata.sessionId = sessionId;
+        }
+        if (userId) {
+            customMetadata.userId = userId;
+        }
+
+        console.log('[JSON Metadata] Metadata prepared:', customMetadata, 'sessionId:', sessionId, 'userId:', userId);
 
         const version = this.getNode().typeVersion;
         const modelName =
