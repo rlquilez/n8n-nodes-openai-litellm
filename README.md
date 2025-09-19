@@ -134,36 +134,47 @@ This node allows you to inject structured JSON metadata into your OpenAI request
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `metadata` | `object` | Custom JSON object with additional context (e.g., projectId, env, workflowId) |
+| **Custom Metadata (JSON)** | `object` | Custom JSON object with additional context (e.g., project, env, workflow) |
+| **Session ID** | `string` | Used for trace grouping and session management |
+| **User ID** | `string` | Optional: for trace attribution and user identification |
 
 ### 🧪 Configuration Example
 
 | Input Field | Example Value |
 |-------------|---------------|
 | **Custom Metadata (JSON)** | See example below |
+| **Session ID** | `default-session-id` |
+| **User ID** | `user-123` |
 
 ```json
 {
-  "langfuse_user_id": "user-id",
-  "langfuse_session_id": "your-session-id",
-  "langfuse_tags": ["tag-1", "tag-2"],
+  "project": "example-project",
   "env": "dev",
   "workflow": "main-flow",
-  "key": "value"
+  "version": "1.0.0",
+  "tags": ["ai", "automation"]
 }
 ```
 
 ### 💡 How It Works
 
-Structured JSON metadata is injected directly into your OpenAI requests, allowing you to track and organize your LLM interactions with custom context data.
+The node uses LiteLLM-compatible metadata transmission through the `extraBody.metadata` parameter, ensuring proper integration with LiteLLM proxies and observability tools.
+
+**Metadata Flow:**
+1. **Session ID** and **User ID** are automatically added to the custom metadata
+2. All metadata is transmitted via LiteLLM's standard `extraBody.metadata` parameter
+3. Compatible with LiteLLM logging, Langfuse, and other observability platforms
+4. Maintains full compatibility with OpenAI-compatible endpoints
 
 **Common Use Cases:**
 
+- **Session Management**: Track conversations across multiple interactions
+- **User Attribution**: Associate requests with specific users
 - **Project Tracking**: Identify which project generated the request
 - **Environment Control**: Differentiate between dev, staging, and production
 - **Workflow Analysis**: Track performance by workflow type
 - **Debugging**: Add unique identifiers for debugging purposes
-- **Auditing**: Maintain detailed logs with relevant context
+- **Observability**: Integration with Langfuse, LiteLLM logging, and custom analytics
 
 ---
 
@@ -212,7 +223,25 @@ Structured JSON metadata is injected directly into your OpenAI requests, allowin
 
 ## 📈 Version History
 
-### v1.0.2 - Current
+### v1.0.7 - Current
+
+- 🔧 **Fixed LiteLLM metadata payload transmission** - Implemented proper `extraBody.metadata` parameter for LiteLLM compatibility
+- 📊 **Added Session ID and User ID fields** - Separate fields for better trace attribution and session management
+- 🎯 **Improved metadata structure** - Based on LiteLLM documentation and reference implementation
+- ✅ **Enhanced observability** - Better integration with Langfuse and LiteLLM logging systems
+
+### v1.0.6
+
+- 🆕 **Added Session ID and User ID fields** - Separate input fields for better metadata organization
+- 🔧 **Improved metadata handling** - Enhanced processing and logging of metadata values
+- 📝 **Simplified default JSON example** - Cleaner default metadata structure
+
+### v1.0.5
+
+- 🔄 **Repository synchronization** - Updated with latest remote changes
+- 📚 **Documentation improvements** - Enhanced README and node descriptions
+
+### v1.0.2
 
 - 🔧 Documentation and examples improvements
 - 🎯 Focus on custom JSON metadata injection
