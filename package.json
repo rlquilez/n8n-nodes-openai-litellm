@@ -1,5 +1,5 @@
 {
-  "name": "n8n-nodes-openai-langfuse",
+  "name": "@rlquilez/n8n-nodes-openai-litellm",
   "version": "1.0.0",
   "description": "n8n community node: OpenAI-compatible LLM provider with structured JSON metadata injection",
   "keywords": [
