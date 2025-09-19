@@ -144,11 +144,12 @@ This node allows you to inject structured JSON metadata into your OpenAI request
 
 ```json
 {
-  "project": "test-project",
+  "langfuse_user_id": "user-id",
+  "langfuse_session_id": "your-session-id",
+  "langfuse_tags": ["tag-1", "tag-2"],
   "env": "dev",
   "workflow": "main-flow",
-  "version": "1.0.0",
-  "tags": ["production", "critical"]
+  "key": "value"
 }
 ```
 

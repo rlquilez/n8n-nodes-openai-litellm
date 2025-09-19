@@ -77,9 +77,12 @@ export class LmChatOpenAiLitellm implements INodeType {
                         name: 'customMetadata',
                         type: 'json',
                         default: `{
-    "project": "example-project",
+    "langfuse_user_id": "user-id",
+    "langfuse_session_id": "your-session-id",
+    "langfuse_tags": ["tag-1", "tag-2"],
     "env": "dev",
-    "workflow": "main-flow"
+    "workflow": "main-flow",
+    "key": "value"
 }`,
                         description: "Optional. Pass extra structured JSON metadata to be attached to the model.",
                     }
