@@ -1,8 +1,8 @@
-# n8n-nodes-openai-langfuse
+# n8n-nodes-openai-litellm
 
 A simplified n8n community node for OpenAI-compatible LLM providers with structured JSON metadata injection capabilities.
 
-npm package: [https://www.npmjs.com/package/n8n-nodes-openai-langfuse](https://www.npmjs.com/package/n8n-nodes-openai-langfuse)
+npm package: [https://www.npmjs.com/package/@rlquilez/n8n-nodes-openai-litellm](https://www.npmjs.com/package/@rlquilez/n8n-nodes-openai-litellm)
 
 ## Features
 
@@ -28,7 +28,7 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 For **n8n v0.187+**, install directly from the UI:
 1. Go to Settings → Community Nodes
 2. Click **Install**
-3. Enter `n8n-nodes-openai-langfuse` in Enter npm package name
+3. Enter `@rlquilez/n8n-nodes-openai-litellm` in Enter npm package name
 4. Agree to the risks of using community nodes
 5. Select Install
 
@@ -56,7 +56,7 @@ For a standard installation without Docker:
 # Go to your n8n installation directory
 cd ~/.n8n 
 # Install the node
-npm install n8n-nodes-openai-langfuse
+npm install @rlquilez/n8n-nodes-openai-litellm
 # Restart n8n to apply the node
 n8n start
 ```
@@ -119,10 +119,7 @@ Custom Metadata (JSON)
 ![workflow-example](https://github.com/rlquilez/n8n-nodes-openai-litellm/blob/main/assets/workflow-example.png?raw=true)
 
 3. **JSON Metadata Output**
-Here’s how traces appear inside the Langfuse dashboard.
-
-![metadata-output-example](https://github.com/rlquilez/n8n-nodes-openai-litellm/blob/main/assets/langfuse-example.png?raw=true)
-
+The structured JSON metadata is injected into your OpenAI requests, allowing you to track and organize your LLM interactions with custom context data.
 
 ## Compatibility
 - Requires n8n version 1.0.0 or later
@@ -140,4 +137,5 @@ Here’s how traces appear inside the Langfuse dashboard.
 
 ## Version History
 
-- **v1.0** – Simplified release with OpenAI-compatible providers and structured JSON metadata injection
+- **v1.0.1** – Updated icons to official OpenAI icons from n8n repository
+- **v1.0.0** – Initial release with OpenAI-compatible providers and structured JSON metadata injection (removed Langfuse dependencies)
