@@ -396,6 +396,24 @@ export class LmChatOpenAiLitellm implements INodeType {
             configuration.baseURL = credentials.url as string;
         }
 
+        // Add custom metadata as HTTP headers for tracking
+        const defaultHeaders: Record<string, string> = {};
+        if (Object.keys(customMetadata).length > 0) {
+            // Convert metadata to headers for OpenAI API compatibility
+            defaultHeaders['X-Custom-Metadata'] = JSON.stringify(customMetadata);
+            
+            // Add individual metadata fields as headers for easier tracking
+            Object.entries(customMetadata).forEach(([key, value]) => {
+                if (typeof value === 'string' || typeof value === 'number') {
+                    defaultHeaders[`X-Metadata-${key}`] = String(value);
+                }
+            });
+        }
+
+        configuration.defaultHeaders = defaultHeaders;
+        
+        console.log('[JSON Metadata] Headers to be sent:', defaultHeaders);
+
         // Extra options to send to OpenAI, that are not directly supported by LangChain
         const modelKwargs: {
             response_format?: object;
@@ -406,10 +424,10 @@ export class LmChatOpenAiLitellm implements INodeType {
             modelKwargs.reasoning_effort = options.reasoningEffort;
 
         const model = new ChatOpenAI({
-            callbacks: [new N8nLlmTracing(this)],
+            callbacks: [new N8nLlmTracing(this, customMetadata)],
             metadata: customMetadata,
             apiKey: credentials.apiKey as string,
-            configuration: { baseURL: configuration.baseURL },
+            configuration,
 
             model: modelName,
             ...options,

@@ -24,9 +24,14 @@ export class N8nLlmTracing extends BaseCallbackHandler {
     connectionType = 'ai_languageModel';
     #parentRunIndex?: number;
     runsMap: Record<string, RunDetail> = {};
+    #customMetadata: Record<string, any> = {};
 
-    constructor(private executionFunctions: ISupplyDataFunctions | IExecuteFunctions) {
+    constructor(
+        private executionFunctions: ISupplyDataFunctions | IExecuteFunctions,
+        customMetadata: Record<string, any> = {}
+    ) {
         super();
+        this.#customMetadata = customMetadata;
     }
 
     async handleLLMStart(llm: Serialized, prompts: string[], runId: string) {
@@ -69,6 +74,7 @@ export class N8nLlmTracing extends BaseCallbackHandler {
             messages: runDetails.messages,
             options: runDetails.options,
             response,
+            customMetadata: this.#customMetadata,
         });
     }
 
