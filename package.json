@@ -1,6 +1,6 @@
 {
   "name": "@rlquilez/n8n-nodes-openai-litellm",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "n8n community node: OpenAI-compatible LLM provider with structured JSON metadata injection",
   "keywords": [
     "n8n-community-node-package",
