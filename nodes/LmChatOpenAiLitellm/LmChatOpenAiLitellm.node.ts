@@ -422,7 +422,7 @@ export class LmChatOpenAiLitellm implements INodeType {
             configuration.baseURL = credentials.url as string;
         }
 
-        // Prepare metadata for LiteLLM - it should be passed directly to ChatOpenAI
+        // Prepare metadata for LiteLLM - it should be passed via extra_body.metadata
         const litellmMetadata: Record<string, any> = {
             ...customMetadata
         };
@@ -441,15 +441,21 @@ export class LmChatOpenAiLitellm implements INodeType {
         const modelKwargs: {
             response_format?: object;
             reasoning_effort?: 'low' | 'medium' | 'high';
+            extra_body?: Record<string, any>;
         } = {};
+        
         if (options.responseFormat) modelKwargs.response_format = { type: options.responseFormat };
         if (options.reasoningEffort && ['low', 'medium', 'high'].includes(options.reasoningEffort))
             modelKwargs.reasoning_effort = options.reasoningEffort;
+        
+        // LiteLLM expects metadata to be sent via extra_body.metadata
+        modelKwargs.extra_body = {
+            metadata: litellmMetadata
+        };
 
         // Prepare ChatOpenAI configuration with LiteLLM metadata
         const chatOpenAIConfig: any = {
             callbacks: [new N8nLlmTracing(this, litellmMetadata)],
-            metadata: litellmMetadata, // Pass metadata directly to ChatOpenAI for LiteLLM
             apiKey: credentials.apiKey as string,
             configuration,
             model: modelName,
@@ -459,7 +465,7 @@ export class LmChatOpenAiLitellm implements INodeType {
             modelKwargs,
         };
 
-        console.log('[JSON Metadata] ChatOpenAI config metadata:', JSON.stringify(chatOpenAIConfig.metadata, null, 2));
+        console.log('[JSON Metadata] ChatOpenAI config with extra_body:', JSON.stringify(chatOpenAIConfig.modelKwargs?.extra_body, null, 2));
 
         const model = new ChatOpenAI(chatOpenAIConfig);
 
