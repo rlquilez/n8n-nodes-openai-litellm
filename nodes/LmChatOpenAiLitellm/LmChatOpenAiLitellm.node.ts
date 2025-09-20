@@ -454,7 +454,12 @@ export class LmChatOpenAiLitellm implements INodeType {
 
         // Add extra_body if we have metadata to send
         if (Object.keys(extra_body).length > 0) {
+            // Try both approaches: direct extra_body and via model_kwargs
             chatOpenAIConfig.extra_body = extra_body;
+            chatOpenAIConfig.modelKwargs = {
+                ...chatOpenAIConfig.modelKwargs,
+                extra_body: extra_body
+            };
             console.log('[JSON Metadata] ChatOpenAI config with extra_body:', JSON.stringify(chatOpenAIConfig, null, 2));
         }
 
