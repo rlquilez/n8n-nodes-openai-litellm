@@ -223,9 +223,20 @@ The node uses LiteLLM-compatible metadata transmission through the `extraBody.me
 
 ## 📈 Version History
 
-### v1.0.7 - Current
+### v1.0.9 - Current
 
-- 🔧 **Fixed LiteLLM metadata payload transmission** - Implemented proper `extraBody.metadata` parameter for LiteLLM compatibility
+- 🔧 **Critical Fix: Corrected extra_body parameter name** - Fixed `extraBody` to `extra_body` to match LangChain ChatOpenAI API specification
+- ✅ **Verified metadata transmission** - Ensures metadata is properly sent to LiteLLM and OpenAI-compatible endpoints
+- 📚 **Based on official documentation** - Implementation follows LangChain and LiteLLM examples
+
+### v1.0.8
+
+- 📝 **Enhanced documentation** - Updated README with detailed metadata features and version history
+- 🎯 **Improved use cases** - Added comprehensive examples and observability integration details
+
+### v1.0.7
+
+- 🔧 **Fixed LiteLLM metadata payload transmission** - Implemented proper `extra_body.metadata` parameter for LiteLLM compatibility
 - 📊 **Added Session ID and User ID fields** - Separate fields for better trace attribution and session management
 - 🎯 **Improved metadata structure** - Based on LiteLLM documentation and reference implementation
 - ✅ **Enhanced observability** - Better integration with Langfuse and LiteLLM logging systems
