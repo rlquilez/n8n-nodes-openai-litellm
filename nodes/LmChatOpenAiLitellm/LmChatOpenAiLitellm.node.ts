@@ -423,12 +423,12 @@ export class LmChatOpenAiLitellm implements INodeType {
         }
 
         // Prepare extra_body for LiteLLM metadata support
-        const extraBody: Record<string, any> = {};
+        const extra_body: Record<string, any> = {};
         if (Object.keys(customMetadata).length > 0) {
-            extraBody.metadata = customMetadata;
+            extra_body.metadata = customMetadata;
         }
         
-        console.log('[JSON Metadata] Extra body to be sent:', extraBody);
+        console.log('[JSON Metadata] Extra body to be sent:', extra_body);
 
         // Extra options to send to OpenAI, that are not directly supported by LangChain
         const modelKwargs: {
@@ -450,7 +450,7 @@ export class LmChatOpenAiLitellm implements INodeType {
             timeout: options.timeout ?? 60000,
             maxRetries: options.maxRetries ?? 2,
             modelKwargs,
-            ...(Object.keys(extraBody).length > 0 && { extraBody }),
+            ...(Object.keys(extra_body).length > 0 && { extra_body }),
         });
 
         return {
