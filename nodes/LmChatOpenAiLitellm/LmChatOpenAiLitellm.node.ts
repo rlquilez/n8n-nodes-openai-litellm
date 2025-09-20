@@ -430,9 +430,15 @@ export class LmChatOpenAiLitellm implements INodeType {
         // Add Langfuse-specific metadata fields from our parameters
         if (userId) {
             litellmMetadata.langfuse_user_id = userId;
+            // Also try the standard field name
+            litellmMetadata.user_id = userId;
         }
         if (sessionId) {
             litellmMetadata.langfuse_session_id = sessionId;
+            // Also try the standard field name that Langfuse expects
+            litellmMetadata.session_id = sessionId;
+            // And the trace field that Langfuse uses
+            litellmMetadata.trace_id = sessionId;
         }
 
         console.log('[JSON Metadata] LiteLLM metadata to be sent:', JSON.stringify(litellmMetadata, null, 2));
@@ -447,7 +453,9 @@ export class LmChatOpenAiLitellm implements INodeType {
         configuration.defaultHeaders = {
             'X-LiteLLM-Metadata': JSON.stringify(litellmMetadata),
             'X-LiteLLM-User-ID': userId || '',
-            'X-LiteLLM-Session-ID': sessionId || ''
+            'X-LiteLLM-Session-ID': sessionId || '',
+            'X-Langfuse-Session-Id': sessionId || '',
+            'X-Langfuse-Trace-Id': sessionId || ''
         };
 
         // Extra options to send to OpenAI, that are not directly supported by LangChain
@@ -531,13 +539,19 @@ export class LmChatOpenAiLitellm implements INodeType {
                         ...clientAny.defaultHeaders,
                         'X-LiteLLM-Metadata': JSON.stringify(litellmMetadata),
                         'X-LiteLLM-User-ID': userId || '',
-                        'X-LiteLLM-Session-ID': sessionId || ''
+                        'X-LiteLLM-Session-ID': sessionId || '',
+                        'X-Langfuse-Session-Id': sessionId || '',
+                        'X-Langfuse-Trace-Id': sessionId || '',
+                        'X-Langfuse-User-Id': userId || ''
                     };
                 } else {
                     clientAny.defaultHeaders = {
                         'X-LiteLLM-Metadata': JSON.stringify(litellmMetadata),
                         'X-LiteLLM-User-ID': userId || '',
-                        'X-LiteLLM-Session-ID': sessionId || ''
+                        'X-LiteLLM-Session-ID': sessionId || '',
+                        'X-Langfuse-Session-Id': sessionId || '',
+                        'X-Langfuse-Trace-Id': sessionId || '',
+                        'X-Langfuse-User-Id': userId || ''
                     };
                 }
                 
