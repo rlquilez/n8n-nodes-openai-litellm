@@ -221,9 +221,82 @@ The node uses LiteLLM-compatible metadata transmission through the `extraBody.me
 
 ---
 
+## 🔗 LiteLLM + Langfuse Configuration
+
+To use this node with LiteLLM and Langfuse for observability, you need to configure your LiteLLM proxy properly:
+
+### 1. LiteLLM Configuration (config.yaml)
+
+```yaml
+model_list:
+  - model_name: gpt-4o-mini
+    litellm_params:
+      model: gpt-4o-mini
+      api_key: os.environ/OPENAI_API_KEY
+
+litellm_settings:
+  success_callback: ["langfuse"]  # Enable Langfuse logging
+  
+# Langfuse environment variables (set these in your environment)
+# LANGFUSE_PUBLIC_KEY=pk-xxx
+# LANGFUSE_SECRET_KEY=sk-xxx  
+# LANGFUSE_HOST=https://cloud.langfuse.com (or your self-hosted URL)
+```
+
+### 2. Environment Variables
+
+Set these environment variables where you run LiteLLM:
+
+```bash
+export LANGFUSE_PUBLIC_KEY="pk-xxx"
+export LANGFUSE_SECRET_KEY="sk-xxx"
+export LANGFUSE_HOST="https://cloud.langfuse.com"
+export OPENAI_API_KEY="sk-xxx"
+```
+
+### 3. Start LiteLLM Proxy
+
+```bash
+litellm --config config.yaml --port 4000
+```
+
+### 4. Configure n8n Node
+
+- **Base URL**: `http://localhost:4000` (or your LiteLLM proxy URL)
+- **API Key**: Any value (LiteLLM will use the configured API key)
+- **Metadata**: Will be automatically forwarded to Langfuse with fields like:
+  - `langfuse_user_id` (from User ID field)
+  - `langfuse_session_id` (from Session ID field)
+  - Custom metadata from JSON field
+
+---
+
 ## 📈 Version History
 
-### v1.0.11 - Current
+### v1.0.15 - Current
+
+- 🔧 **Fixed LiteLLM + Langfuse integration** - Changed metadata format to work correctly with LiteLLM proxy
+- ✅ **Proper Langfuse fields** - Added `langfuse_user_id` and `langfuse_session_id` for proper trace attribution
+- 🎯 **Simplified approach** - Removed complex `extra_body` approach in favor of direct metadata field
+- 📚 **Enhanced documentation** - Added comprehensive LiteLLM + Langfuse configuration guide
+
+### v1.0.14
+
+- 🔧 **Enhanced metadata transmission** - Added dual approach with both direct `extra_body` and `modelKwargs.extra_body` for maximum compatibility
+- 📊 **Improved logging** - Enhanced console logging to show both `extra_body` and `modelKwargs` configuration
+
+### v1.0.13
+
+- 🔧 **Multiple transmission approaches** - Attempted various methods to ensure metadata reaches LLM endpoint
+- 📊 **Enhanced debugging** - Added comprehensive logging for troubleshooting
+
+### v1.0.12
+
+- 🔧 **Enhanced metadata transmission** - Added dual approach with both direct `extra_body` and `modelKwargs.extra_body` for maximum compatibility
+- 📊 **Improved logging** - Enhanced console logging to show both `extra_body` and `modelKwargs` configuration
+- 📚 **Documentation** - Updated README with comprehensive version history and troubleshooting guide
+
+### v1.0.11
 
 - 🔧 **Critical Fix: Proper extra_body parameter application** - Reorganized ChatOpenAI configuration to prevent options spread from overriding extra_body
 - ✅ **Enhanced payload transmission** - Ensures metadata is properly included in the request payload to LiteLLM/OpenAI endpoints
