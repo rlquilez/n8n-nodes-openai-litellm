@@ -223,7 +223,17 @@ The node uses LiteLLM-compatible metadata transmission through the `extraBody.me
 
 ## 📈 Version History
 
-### v1.0.9 - Current
+### v1.0.11 - Current
+
+- 🔧 **Critical Fix: Proper extra_body parameter application** - Reorganized ChatOpenAI configuration to prevent options spread from overriding extra_body
+- ✅ **Enhanced payload transmission** - Ensures metadata is properly included in the request payload to LiteLLM/OpenAI endpoints
+- 📊 **Added detailed logging** - Better visibility into extra_body configuration for debugging
+
+### v1.0.10
+
+- 📝 **Documentation update** - Updated version history with v1.0.9 critical fix details
+
+### v1.0.9
 
 - 🔧 **Critical Fix: Corrected extra_body parameter name** - Fixed `extraBody` to `extra_body` to match LangChain ChatOpenAI API specification
 - ✅ **Verified metadata transmission** - Ensures metadata is properly sent to LiteLLM and OpenAI-compatible endpoints
