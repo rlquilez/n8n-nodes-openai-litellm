@@ -422,13 +422,20 @@ export class LmChatOpenAiLitellm implements INodeType {
             configuration.baseURL = credentials.url as string;
         }
 
-        // Prepare extra_body for LiteLLM metadata support
-        const extra_body: Record<string, any> = {};
-        if (Object.keys(customMetadata).length > 0) {
-            extra_body.metadata = customMetadata;
+        // Prepare metadata for LiteLLM - it should be passed directly to ChatOpenAI
+        const litellmMetadata: Record<string, any> = {
+            ...customMetadata
+        };
+
+        // Add Langfuse-specific metadata fields from our parameters
+        if (userId) {
+            litellmMetadata.langfuse_user_id = userId;
         }
-        
-        console.log('[JSON Metadata] Extra body to be sent:', extra_body);
+        if (sessionId) {
+            litellmMetadata.langfuse_session_id = sessionId;
+        }
+
+        console.log('[JSON Metadata] LiteLLM metadata to be sent:', JSON.stringify(litellmMetadata, null, 2));
 
         // Extra options to send to OpenAI, that are not directly supported by LangChain
         const modelKwargs: {
@@ -439,10 +446,10 @@ export class LmChatOpenAiLitellm implements INodeType {
         if (options.reasoningEffort && ['low', 'medium', 'high'].includes(options.reasoningEffort))
             modelKwargs.reasoning_effort = options.reasoningEffort;
 
-        // Prepare ChatOpenAI configuration
+        // Prepare ChatOpenAI configuration with LiteLLM metadata
         const chatOpenAIConfig: any = {
-            callbacks: [new N8nLlmTracing(this, customMetadata)],
-            metadata: customMetadata,
+            callbacks: [new N8nLlmTracing(this, litellmMetadata)],
+            metadata: litellmMetadata, // Pass metadata directly to ChatOpenAI for LiteLLM
             apiKey: credentials.apiKey as string,
             configuration,
             model: modelName,
@@ -452,24 +459,7 @@ export class LmChatOpenAiLitellm implements INodeType {
             modelKwargs,
         };
 
-        // Add extra_body if we have metadata to send
-        if (Object.keys(extra_body).length > 0) {
-            // Try multiple approaches to ensure metadata is transmitted
-            chatOpenAIConfig.extra_body = extra_body;
-            
-            // Also add to modelKwargs for compatibility
-            chatOpenAIConfig.modelKwargs = {
-                ...chatOpenAIConfig.modelKwargs,
-                extra_body: extra_body,
-                // Also try direct metadata injection
-                metadata: extra_body.metadata
-            };
-            
-            console.log('[JSON Metadata] ChatOpenAI config with extra_body:', JSON.stringify({
-                extra_body: chatOpenAIConfig.extra_body,
-                modelKwargs: chatOpenAIConfig.modelKwargs
-            }, null, 2));
-        }
+        console.log('[JSON Metadata] ChatOpenAI config metadata:', JSON.stringify(chatOpenAIConfig.metadata, null, 2));
 
         const model = new ChatOpenAI(chatOpenAIConfig);
 
