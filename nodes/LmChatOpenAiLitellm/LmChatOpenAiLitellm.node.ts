@@ -437,21 +437,41 @@ export class LmChatOpenAiLitellm implements INodeType {
 
         console.log('[JSON Metadata] LiteLLM metadata to be sent:', JSON.stringify(litellmMetadata, null, 2));
 
+        // Try multiple approaches to ensure metadata reaches LiteLLM
+        // Approach 1: Use defaultQuery in configuration (for query params)
+        configuration.defaultQuery = {
+            'litellm-metadata': JSON.stringify(litellmMetadata)
+        };
+
+        // Approach 2: Use defaultHeaders (LiteLLM might check headers)
+        configuration.defaultHeaders = {
+            'X-LiteLLM-Metadata': JSON.stringify(litellmMetadata),
+            'X-LiteLLM-User-ID': userId || '',
+            'X-LiteLLM-Session-ID': sessionId || ''
+        };
+
         // Extra options to send to OpenAI, that are not directly supported by LangChain
         const modelKwargs: {
             response_format?: object;
             reasoning_effort?: 'low' | 'medium' | 'high';
             extra_body?: Record<string, any>;
+            metadata?: Record<string, any>; // Direct metadata
         } = {};
         
         if (options.responseFormat) modelKwargs.response_format = { type: options.responseFormat };
         if (options.reasoningEffort && ['low', 'medium', 'high'].includes(options.reasoningEffort))
             modelKwargs.reasoning_effort = options.reasoningEffort;
         
-        // LiteLLM expects metadata to be sent via extra_body.metadata
+        // Multiple approaches to ensure LiteLLM receives metadata:
+        
+        // Approach 1: extra_body.metadata (primary LiteLLM method)
         modelKwargs.extra_body = {
-            metadata: litellmMetadata
+            metadata: litellmMetadata,
+            user: userId || undefined
         };
+
+        // Approach 2: Direct metadata field (fallback)
+        modelKwargs.metadata = litellmMetadata;
 
         // Prepare ChatOpenAI configuration with LiteLLM metadata
         const chatOpenAIConfig: any = {
@@ -465,9 +485,67 @@ export class LmChatOpenAiLitellm implements INodeType {
             modelKwargs,
         };
 
+        // Add user field at top level for LiteLLM user tracking
+        if (userId) {
+            chatOpenAIConfig.user = userId;
+        }
+
+        // CRITICAL: Add metadata directly to the configuration for LiteLLM
+        // This ensures LiteLLM receives the metadata regardless of LangChain processing
+        chatOpenAIConfig.metadata = litellmMetadata;
+
         console.log('[JSON Metadata] ChatOpenAI config with extra_body:', JSON.stringify(chatOpenAIConfig.modelKwargs?.extra_body, null, 2));
+        console.log('[JSON Metadata] ChatOpenAI config headers:', JSON.stringify(chatOpenAIConfig.configuration?.defaultHeaders, null, 2));
+        console.log('[JSON Metadata] ChatOpenAI config query:', JSON.stringify(chatOpenAIConfig.configuration?.defaultQuery, null, 2));
+        console.log('[JSON Metadata] ChatOpenAI direct metadata:', JSON.stringify(chatOpenAIConfig.metadata, null, 2));
+        console.log('[JSON Metadata] Full ChatOpenAI config summary:', JSON.stringify({
+            model: chatOpenAIConfig.model,
+            baseURL: chatOpenAIConfig.configuration?.baseURL,
+            user: chatOpenAIConfig.user,
+            hasExtraBody: !!chatOpenAIConfig.modelKwargs?.extra_body,
+            hasHeaders: !!chatOpenAIConfig.configuration?.defaultHeaders,
+            hasQuery: !!chatOpenAIConfig.configuration?.defaultQuery,
+            hasDirectMetadata: !!chatOpenAIConfig.metadata,
+            metadataKeys: Object.keys(chatOpenAIConfig.modelKwargs?.extra_body?.metadata || {})
+        }, null, 2));
 
         const model = new ChatOpenAI(chatOpenAIConfig);
+
+        // Post-initialization: Try to inject metadata directly into the OpenAI client
+        // This is a workaround for LangChain not properly passing extra_body
+        try {
+            if (model.client && typeof model.client === 'object') {
+                // Try to add metadata to the client's default options
+                const clientAny = model.client as any;
+                if (clientAny.defaultQuery) {
+                    clientAny.defaultQuery = {
+                        ...clientAny.defaultQuery,
+                        'metadata': JSON.stringify(litellmMetadata)
+                    };
+                } else {
+                    clientAny.defaultQuery = { 'metadata': JSON.stringify(litellmMetadata) };
+                }
+                
+                if (clientAny.defaultHeaders) {
+                    clientAny.defaultHeaders = {
+                        ...clientAny.defaultHeaders,
+                        'X-LiteLLM-Metadata': JSON.stringify(litellmMetadata),
+                        'X-LiteLLM-User-ID': userId || '',
+                        'X-LiteLLM-Session-ID': sessionId || ''
+                    };
+                } else {
+                    clientAny.defaultHeaders = {
+                        'X-LiteLLM-Metadata': JSON.stringify(litellmMetadata),
+                        'X-LiteLLM-User-ID': userId || '',
+                        'X-LiteLLM-Session-ID': sessionId || ''
+                    };
+                }
+                
+                console.log('[JSON Metadata] Successfully injected metadata into OpenAI client');
+            }
+        } catch (error) {
+            console.log('[JSON Metadata] Failed to inject metadata into client:', error.message);
+        }
 
         return {
             response: model,
