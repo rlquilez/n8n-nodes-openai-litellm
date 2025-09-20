@@ -439,19 +439,26 @@ export class LmChatOpenAiLitellm implements INodeType {
         if (options.reasoningEffort && ['low', 'medium', 'high'].includes(options.reasoningEffort))
             modelKwargs.reasoning_effort = options.reasoningEffort;
 
-        const model = new ChatOpenAI({
+        // Prepare ChatOpenAI configuration
+        const chatOpenAIConfig: any = {
             callbacks: [new N8nLlmTracing(this, customMetadata)],
             metadata: customMetadata,
             apiKey: credentials.apiKey as string,
             configuration,
-
             model: modelName,
             ...options,
             timeout: options.timeout ?? 60000,
             maxRetries: options.maxRetries ?? 2,
             modelKwargs,
-            ...(Object.keys(extra_body).length > 0 && { extra_body }),
-        });
+        };
+
+        // Add extra_body if we have metadata to send
+        if (Object.keys(extra_body).length > 0) {
+            chatOpenAIConfig.extra_body = extra_body;
+            console.log('[JSON Metadata] ChatOpenAI config with extra_body:', JSON.stringify(chatOpenAIConfig, null, 2));
+        }
+
+        const model = new ChatOpenAI(chatOpenAIConfig);
 
         return {
             response: model,
